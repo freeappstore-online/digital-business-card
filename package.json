@@ -1,0 +1,21 @@
+{
+  "name": "digital-business-card",
+  "private": true,
+  "packageManager": "pnpm@10.30.3",
+  "engines": {
+    "node": ">=22"
+  },
+  "pnpm": {
+    "onlyBuiltDependencies": [
+      "esbuild",
+      "sharp"
+    ]
+  },
+  "scripts": {
+    "dev": "pnpm --filter @digital-business-card/web dev",
+    "build": "pnpm --filter @digital-business-card/web build",
+    "preview": "pnpm --filter @digital-business-card/web preview",
+    "typecheck": "pnpm --filter @digital-business-card/web exec tsc -b",
+    "test": "pnpm --filter @digital-business-card/web test"
+  }
+}
