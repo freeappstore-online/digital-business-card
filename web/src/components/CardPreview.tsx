@@ -1,4 +1,9 @@
-import type { BusinessCard } from '../lib/card';
+import {
+  resolveInstagramUrl,
+  resolveTelegramUrl,
+  resolveWhatsAppUrl,
+  type BusinessCard,
+} from '../lib/card';
 
 type CardPreviewProps = {
   card: BusinessCard;
@@ -6,11 +11,18 @@ type CardPreviewProps = {
 };
 
 export function CardPreview({ card, views }: CardPreviewProps) {
+  const igUrl = resolveInstagramUrl(card.instagram);
+  const waUrl = resolveWhatsAppUrl(card.whatsapp);
+  const tgUrl = resolveTelegramUrl(card.telegram);
+
   const links = [
     card.website ? { label: 'Website', href: card.website } : null,
     card.linkedin ? { label: 'LinkedIn', href: card.linkedin } : null,
     card.x ? { label: 'X', href: card.x } : null,
     card.github ? { label: 'GitHub', href: card.github } : null,
+    igUrl ? { label: 'Instagram', href: igUrl } : null,
+    waUrl ? { label: 'WhatsApp', href: waUrl } : null,
+    tgUrl ? { label: 'Telegram', href: tgUrl } : null,
   ].filter(Boolean) as { label: string; href: string }[];
 
   return (
@@ -41,6 +53,12 @@ export function CardPreview({ card, views }: CardPreviewProps) {
             <dd>
               <a href={`tel:${card.phone}`}>{card.phone}</a>
             </dd>
+          </div>
+        ) : null}
+        {card.wechat ? (
+          <div>
+            <dt>WeChat</dt>
+            <dd>{card.wechat}</dd>
           </div>
         ) : null}
       </dl>

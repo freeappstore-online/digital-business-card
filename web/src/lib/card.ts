@@ -14,6 +14,10 @@ export type BusinessCard = {
   linkedin: string;
   x: string;
   github: string;
+  instagram: string;
+  whatsapp: string;
+  wechat: string;
+  telegram: string;
 };
 
 export type CardDocument = BusinessCard & { id: string };
@@ -30,6 +34,10 @@ export const EMPTY_CARD: BusinessCard = {
   linkedin: '',
   x: '',
   github: '',
+  instagram: '',
+  whatsapp: '',
+  wechat: '',
+  telegram: '',
 };
 
 const MAX_BIO = 500;
@@ -67,7 +75,33 @@ export function normalizeCard(input: Partial<BusinessCard>): BusinessCard {
     linkedin: trim(input.linkedin, 200),
     x: trim(input.x, 200),
     github: trim(input.github, 200),
+    instagram: trim(input.instagram, 200),
+    whatsapp: trim(input.whatsapp, 200),
+    wechat: trim(input.wechat, 64),
+    telegram: trim(input.telegram, 200),
   };
+}
+
+export function resolveInstagramUrl(value: string): string | null {
+  if (!value) return null;
+  if (value.includes('://')) return isHttpUrl(value) ? value : null;
+  const handle = value.replace(/^@/, '');
+  return /^[a-zA-Z0-9._]{1,30}$/.test(handle) ? `https://instagram.com/${handle}` : null;
+}
+
+export function resolveTelegramUrl(value: string): string | null {
+  if (!value) return null;
+  if (value.includes('://')) return isHttpUrl(value) ? value : null;
+  const handle = value.replace(/^@/, '');
+  return /^[a-zA-Z0-9_]{3,32}$/.test(handle) ? `https://t.me/${handle}` : null;
+}
+
+export function resolveWhatsAppUrl(value: string): string | null {
+  if (!value) return null;
+  if (value.includes('://')) return isHttpUrl(value) ? value : null;
+  if (!/^[+\d\s().-]+$/.test(value)) return null;
+  const digits = value.replace(/\D/g, '');
+  return digits.length >= 6 && digits.length <= 15 ? `https://wa.me/${digits}` : null;
 }
 
 export function validateCard(card: BusinessCard): string | null {
@@ -84,6 +118,15 @@ export function validateCard(card: BusinessCard): string | null {
     if (value && !isHttpUrl(value)) {
       return `${label} must start with https://`;
     }
+  }
+  if (card.instagram && !resolveInstagramUrl(card.instagram)) {
+    return 'Instagram must be a @handle or https:// URL.';
+  }
+  if (card.whatsapp && !resolveWhatsAppUrl(card.whatsapp)) {
+    return 'WhatsApp must be a phone number (with country code) or https://wa.me/… URL.';
+  }
+  if (card.telegram && !resolveTelegramUrl(card.telegram)) {
+    return 'Telegram must be a @username or https://t.me/… URL.';
   }
   return null;
 }
@@ -114,6 +157,13 @@ export function toVCard(card: BusinessCard, pageUrl?: string): string {
   if (card.linkedin) lines.push(`URL;TYPE=LinkedIn:${escapeVCard(card.linkedin)}`);
   if (card.x) lines.push(`URL;TYPE=X:${escapeVCard(card.x)}`);
   if (card.github) lines.push(`URL;TYPE=GitHub:${escapeVCard(card.github)}`);
+  const igUrl = resolveInstagramUrl(card.instagram);
+  if (igUrl) lines.push(`URL;TYPE=Instagram:${escapeVCard(igUrl)}`);
+  const waUrl = resolveWhatsAppUrl(card.whatsapp);
+  if (waUrl) lines.push(`URL;TYPE=WhatsApp:${escapeVCard(waUrl)}`);
+  const tgUrl = resolveTelegramUrl(card.telegram);
+  if (tgUrl) lines.push(`URL;TYPE=Telegram:${escapeVCard(tgUrl)}`);
+  if (card.wechat) lines.push(`X-SOCIALPROFILE;TYPE=WeChat:${escapeVCard(card.wechat)}`);
   if (card.bio) lines.push(`NOTE:${escapeVCard(card.bio)}`);
   if (pageUrl) lines.push(`URL;TYPE=Profile:${escapeVCard(pageUrl)}`);
   lines.push('END:VCARD');

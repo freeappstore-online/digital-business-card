@@ -43,7 +43,14 @@ export function PublicCard({ cardId }: PublicCardProps) {
         setCard(cardFromDocument(doc));
       } catch (err) {
         if (!ac.signal.aborted) {
-          setError(err instanceof Error ? err.message : 'Could not load this card.');
+          const raw = err instanceof Error ? err.message : 'Could not load this card.';
+          // Private collection → 401 for signed-out / other users until app owner runs
+          // `fas db share cards`. Code `{ visibility: 'public-read' }` alone is not enough.
+          setError(
+            /\b401\b/.test(raw)
+              ? 'This card is not public yet. The app owner needs to run: fas db share cards'
+              : raw,
+          );
         }
       } finally {
         if (!ac.signal.aborted) setLoading(false);

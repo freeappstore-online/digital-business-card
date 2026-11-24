@@ -38,3 +38,26 @@ it('builds a vCard with contact fields', () => {
   expect(vcf).toContain('URL;TYPE=Profile:https://example.com/c/abc');
   expect(vcf).toContain('END:VCARD');
 });
+
+it('supports Instagram, WhatsApp, WeChat, and Telegram handles and URLs', () => {
+  const card = normalizeCard({
+    displayName: 'Alex Rivera',
+    instagram: '@alex.design',
+    whatsapp: '+61 411 935 878',
+    wechat: 'alex_wx_01',
+    telegram: '@alex_tg',
+  });
+  expect(validateCard(card)).toBeNull();
+
+  const vcf = toVCard(card);
+  expect(vcf).toContain('URL;TYPE=Instagram:https://instagram.com/alex.design');
+  expect(vcf).toContain('URL;TYPE=WhatsApp:https://wa.me/61411935878');
+  expect(vcf).toContain('URL;TYPE=Telegram:https://t.me/alex_tg');
+  expect(vcf).toContain('X-SOCIALPROFILE;TYPE=WeChat:alex_wx_01');
+});
+
+it('rejects invalid Instagram, WhatsApp, and Telegram values', () => {
+  expect(validateCard({ ...EMPTY_CARD, displayName: 'Alex', instagram: 'ftp://ig.com/a' })).toMatch(/Instagram/);
+  expect(validateCard({ ...EMPTY_CARD, displayName: 'Alex', whatsapp: 'abc' })).toMatch(/WhatsApp/);
+  expect(validateCard({ ...EMPTY_CARD, displayName: 'Alex', telegram: 'a' })).toMatch(/Telegram/);
+});

@@ -25,6 +25,10 @@ const FIELDS: {
   { key: 'linkedin', label: 'LinkedIn URL', type: 'url', placeholder: 'https://linkedin.com/in/…' },
   { key: 'x', label: 'X URL', type: 'url', placeholder: 'https://x.com/…' },
   { key: 'github', label: 'GitHub URL', type: 'url', placeholder: 'https://github.com/…' },
+  { key: 'instagram', label: 'Instagram', placeholder: '@handle or https://instagram.com/…' },
+  { key: 'whatsapp', label: 'WhatsApp', placeholder: '+61 411 935 878 or https://wa.me/…' },
+  { key: 'wechat', label: 'WeChat ID', placeholder: 'your_wechat_id' },
+  { key: 'telegram', label: 'Telegram', placeholder: '@username or https://t.me/…' },
   {
     key: 'bio',
     label: 'Bio',
