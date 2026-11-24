@@ -29,13 +29,24 @@ export function CardPreview({ card, views }: CardPreviewProps) {
     <article className="card-surface" aria-label={`${card.displayName || 'Business'} card`}>
       <div className="card-surface__glow" aria-hidden="true" />
       <p className="card-surface__eyebrow">Digital card</p>
-      <h2 className="card-surface__name">{card.displayName || 'Your name'}</h2>
-      {(card.headline || card.company) && (
-        <p className="card-surface__role">
-          {[card.headline, card.company].filter(Boolean).join(' · ')}
-        </p>
-      )}
-      {card.location ? <p className="card-surface__meta">{card.location}</p> : null}
+      <div className="card-surface__header">
+        {card.photo ? (
+          <img
+            src={card.photo}
+            alt={card.displayName || 'Profile photo'}
+            className="card-surface__avatar"
+          />
+        ) : null}
+        <div className="card-surface__identity">
+          <h2 className="card-surface__name">{card.displayName || 'Your name'}</h2>
+          {(card.headline || card.company) && (
+            <p className="card-surface__role">
+              {[card.headline, card.company].filter(Boolean).join(' · ')}
+            </p>
+          )}
+          {card.location ? <p className="card-surface__meta">{card.location}</p> : null}
+        </div>
+      </div>
       {card.bio ? <p className="card-surface__bio">{card.bio}</p> : null}
 
       <dl className="card-surface__contacts">

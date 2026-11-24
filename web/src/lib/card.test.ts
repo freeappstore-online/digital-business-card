@@ -61,3 +61,14 @@ it('rejects invalid Instagram, WhatsApp, and Telegram values', () => {
   expect(validateCard({ ...EMPTY_CARD, displayName: 'Alex', whatsapp: 'abc' })).toMatch(/WhatsApp/);
   expect(validateCard({ ...EMPTY_CARD, displayName: 'Alex', telegram: 'a' })).toMatch(/Telegram/);
 });
+
+it('validates profile photo data URLs and embeds them in vCard', () => {
+  const validPhoto = 'data:image/jpeg;base64,/9j/4AAQSkZJRg==';
+  const card = normalizeCard({ displayName: 'Alex Rivera', photo: validPhoto });
+  expect(validateCard(card)).toBeNull();
+  expect(toVCard(card)).toContain('PHOTO;ENCODING=b;TYPE=JPEG:/9j/4AAQSkZJRg==');
+
+  expect(
+    validateCard({ ...EMPTY_CARD, displayName: 'Alex', photo: 'javascript:alert(1)' }),
+  ).toMatch(/photo/i);
+});

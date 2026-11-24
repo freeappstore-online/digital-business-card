@@ -1,4 +1,5 @@
 import type { FreeAppStore } from '@freeappstore/sdk';
+import { MAX_PHOTO_DATA_URL_LENGTH } from './photo';
 
 export const CARDS_COLLECTION = 'cards';
 
@@ -6,6 +7,7 @@ export type BusinessCard = {
   displayName: string;
   headline: string;
   company: string;
+  photo: string;
   email: string;
   phone: string;
   website: string;
@@ -26,6 +28,7 @@ export const EMPTY_CARD: BusinessCard = {
   displayName: '',
   headline: '',
   company: '',
+  photo: '',
   email: '',
   phone: '',
   website: '',
@@ -67,6 +70,7 @@ export function normalizeCard(input: Partial<BusinessCard>): BusinessCard {
     displayName: trim(input.displayName),
     headline: trim(input.headline),
     company: trim(input.company),
+    photo: typeof input.photo === 'string' ? input.photo.trim() : '',
     email: trim(input.email),
     phone: trim(input.phone),
     website: trim(input.website, 200),
@@ -128,7 +132,15 @@ export function validateCard(card: BusinessCard): string | null {
   if (card.telegram && !resolveTelegramUrl(card.telegram)) {
     return 'Telegram must be a @username or https://t.me/… URL.';
   }
+  if (card.photo && !isValidPhotoDataUrl(card.photo)) {
+    return 'Profile photo is invalid or too large.';
+  }
   return null;
+}
+
+function isValidPhotoDataUrl(value: string): boolean {
+  if (value.length > MAX_PHOTO_DATA_URL_LENGTH) return false;
+  return /^data:image\/(jpeg|png|webp);base64,[A-Za-z0-9+/=]+$/.test(value);
 }
 
 function isHttpUrl(value: string): boolean {
@@ -164,6 +176,12 @@ export function toVCard(card: BusinessCard, pageUrl?: string): string {
   const tgUrl = resolveTelegramUrl(card.telegram);
   if (tgUrl) lines.push(`URL;TYPE=Telegram:${escapeVCard(tgUrl)}`);
   if (card.wechat) lines.push(`X-SOCIALPROFILE;TYPE=WeChat:${escapeVCard(card.wechat)}`);
+  if (card.photo) {
+    const match = /^data:image\/(jpeg|png|webp);base64,([A-Za-z0-9+/=]+)$/.exec(card.photo);
+    if (match) {
+      lines.push(`PHOTO;ENCODING=b;TYPE=${match[1].toUpperCase()}:${match[2]}`);
+    }
+  }
   if (card.bio) lines.push(`NOTE:${escapeVCard(card.bio)}`);
   if (pageUrl) lines.push(`URL;TYPE=Profile:${escapeVCard(pageUrl)}`);
   lines.push('END:VCARD');

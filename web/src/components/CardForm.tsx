@@ -1,5 +1,6 @@
-import type { ChangeEvent } from 'react';
+import { useRef, useState, type ChangeEvent } from 'react';
 import type { BusinessCard } from '../lib/card';
+import { compressProfilePhoto } from '../lib/photo';
 
 type CardFormProps = {
   value: BusinessCard;
@@ -7,8 +8,10 @@ type CardFormProps = {
   disabled?: boolean;
 };
 
+type TextFieldKey = Exclude<keyof BusinessCard, 'photo'>;
+
 const FIELDS: {
-  key: keyof BusinessCard;
+  key: TextFieldKey;
   label: string;
   type?: string;
   autoComplete?: string;
@@ -38,8 +41,75 @@ const FIELDS: {
 ];
 
 export function CardForm({ value, onChange, disabled }: CardFormProps) {
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [photoBusy, setPhotoBusy] = useState(false);
+  const [photoError, setPhotoError] = useState<string | null>(null);
+
+  const handlePhotoChange = async (event: ChangeEvent<HTMLInputElement>) => {
+    const file = event.currentTarget.files?.[0];
+    if (!file) return;
+    setPhotoBusy(true);
+    setPhotoError(null);
+    try {
+      const dataUrl = await compressProfilePhoto(file);
+      onChange({ ...value, photo: dataUrl });
+    } catch (err) {
+      setPhotoError(err instanceof Error ? err.message : 'Could not load that photo.');
+    } finally {
+      setPhotoBusy(false);
+      if (fileInputRef.current) fileInputRef.current.value = '';
+    }
+  };
+
   return (
     <div className="card-form">
+      <div className="card-form__field">
+        <label htmlFor="card-photo">Profile photo</label>
+        <div className="photo-picker">
+          {value.photo ? (
+            <img
+              src={value.photo}
+              alt={`${value.displayName || 'Profile'} preview`}
+              className="photo-picker__thumb"
+            />
+          ) : (
+            <div className="photo-picker__placeholder" aria-hidden="true">
+              {(value.displayName.trim()[0] || '?').toUpperCase()}
+            </div>
+          )}
+          <div className="photo-picker__controls">
+            <input
+              ref={fileInputRef}
+              id="card-photo"
+              type="file"
+              accept="image/*"
+              disabled={disabled || photoBusy}
+              onChange={(event) => void handlePhotoChange(event)}
+              className="photo-picker__input"
+            />
+            {value.photo ? (
+              <button
+                type="button"
+                className="btn"
+                disabled={disabled || photoBusy}
+                onClick={() => {
+                  setPhotoError(null);
+                  onChange({ ...value, photo: '' });
+                }}
+              >
+                Remove photo
+              </button>
+            ) : null}
+          </div>
+        </div>
+        <p className="form-hint">Cropped to a square and compressed automatically.</p>
+        {photoError ? (
+          <p role="alert" className="form-alert">
+            {photoError}
+          </p>
+        ) : null}
+      </div>
+
       {FIELDS.map((field) => {
         const id = `card-${field.key}`;
         const common = {
