@@ -11,12 +11,14 @@ import {
   viewsCounterKey,
   type CardDocument,
 } from '../lib/card';
+import { useI18n } from '../lib/i18n';
 
 type PublicCardProps = {
   cardId: string;
 };
 
 export function PublicCard({ cardId }: PublicCardProps) {
+  const { t } = useI18n();
   const toast = useToast();
   const { user, loading: authLoading } = useAuth(fas);
   const [card, setCard] = useState<CardDocument | null>(null);
@@ -24,7 +26,9 @@ export function PublicCard({ cardId }: PublicCardProps) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  useDocumentTitle(card ? `${card.displayName} — Digital Card` : 'Card — Digital Card');
+  useDocumentTitle(
+    card ? `${card.displayName} — ${t.appName}` : `${t.publicCard.loadingTitle} — ${t.appName}`,
+  );
 
   useEffect(() => {
     const ac = new AbortController();
@@ -37,20 +41,14 @@ export function PublicCard({ cardId }: PublicCardProps) {
         if (ac.signal.aborted) return;
         if (!doc) {
           setCard(null);
-          setError('This card was not found, or the cards collection is not shared yet.');
+          setError(t.publicCard.notFound);
           return;
         }
         setCard(cardFromDocument(doc));
       } catch (err) {
         if (!ac.signal.aborted) {
-          const raw = err instanceof Error ? err.message : 'Could not load this card.';
-          // Private collection → 401 for signed-out / other users until app owner runs
-          // `fas db share cards`. Code `{ visibility: 'public-read' }` alone is not enough.
-          setError(
-            /\b401\b/.test(raw)
-              ? 'This card is not public yet. The app owner needs to run: fas db share cards'
-              : raw,
-          );
+          const raw = err instanceof Error ? err.message : t.publicCard.loadError;
+          setError(/\b401\b/.test(raw) ? t.publicCard.notPublic : raw);
         }
       } finally {
         if (!ac.signal.aborted) setLoading(false);
@@ -58,7 +56,7 @@ export function PublicCard({ cardId }: PublicCardProps) {
     })();
 
     return () => ac.abort();
-  }, [cardId]);
+  }, [cardId, t.publicCard.loadError, t.publicCard.notFound, t.publicCard.notPublic]);
 
   useEffect(() => {
     if (!card || authLoading) return;
@@ -91,8 +89,8 @@ export function PublicCard({ cardId }: PublicCardProps) {
   if (loading) {
     return (
       <>
-        <PageHeader title="Card" />
-        <p role="status">Loading card…</p>
+        <PageHeader title={t.publicCard.loadingTitle} />
+        <p role="status">{t.publicCard.loading}</p>
         <Spinner />
       </>
     );
@@ -101,8 +99,8 @@ export function PublicCard({ cardId }: PublicCardProps) {
   if (error || !card) {
     return (
       <>
-        <PageHeader title="Card not found" />
-        <p role="alert">{error ?? 'This card is unavailable.'}</p>
+        <PageHeader title={t.publicCard.notFoundTitle} />
+        <p role="alert">{error ?? t.publicCard.unavailable}</p>
       </>
     );
   }
@@ -113,17 +111,17 @@ export function PublicCard({ cardId }: PublicCardProps) {
     <>
       <PageHeader
         title={card.displayName}
-        description={[card.headline, card.company].filter(Boolean).join(' · ') || 'Digital business card'}
+        description={[card.headline, card.company].filter(Boolean).join(' · ') || t.publicCard.fallbackDesc}
         actions={
           <button
             type="button"
             className="btn btn--primary"
             onClick={() => {
               downloadVCard(card, url);
-              toast.show('vCard downloaded', { variant: 'success' });
+              toast.show(t.publicCard.vCardDownloaded, { variant: 'success' });
             }}
           >
-            Save contact
+            {t.publicCard.saveContact}
           </button>
         }
       />

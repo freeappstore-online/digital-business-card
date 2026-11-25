@@ -1,5 +1,6 @@
 import { useToast } from '@freeappstore/sdk/ui';
 import { downloadVCard, publicCardUrl, type BusinessCard } from '../lib/card';
+import { useI18n } from '../lib/i18n';
 import { QrCode } from '../lib/QrCode';
 
 type SharePanelProps = {
@@ -8,15 +9,16 @@ type SharePanelProps = {
 };
 
 export function SharePanel({ cardId, card }: SharePanelProps) {
+  const { t } = useI18n();
   const toast = useToast();
   const url = publicCardUrl(cardId);
 
   const copyLink = async () => {
     try {
       await navigator.clipboard.writeText(url);
-      toast.show('Link copied', { variant: 'success' });
+      toast.show(t.share.copiedToast, { variant: 'success' });
     } catch {
-      toast.show('Could not copy — select the link instead', { variant: 'error' });
+      toast.show(t.share.copyFailedToast, { variant: 'error' });
     }
   };
 
@@ -28,7 +30,7 @@ export function SharePanel({ cardId, card }: SharePanelProps) {
     try {
       await navigator.share({
         title: card.displayName,
-        text: `${card.displayName}'s digital business card`,
+        text: t.share.shareText(card.displayName),
         url,
       });
     } catch {
@@ -38,14 +40,11 @@ export function SharePanel({ cardId, card }: SharePanelProps) {
 
   return (
     <section className="share-panel" aria-labelledby="share-title">
-      <h2 id="share-title">Share</h2>
-      <p className="share-panel__hint">
-        Others open your public profile from this link or QR code. NFC writing is not available in
-        iOS Safari, so sharing is QR and link only.
-      </p>
+      <h2 id="share-title">{t.share.title}</h2>
+      <p className="share-panel__hint">{t.share.hint}</p>
 
       <div className="share-panel__qr">
-        <QrCode value={url} label={`QR code for ${card.displayName}'s card`} className="share-panel__qr-svg" />
+        <QrCode value={url} label={t.share.qrAlt(card.displayName)} className="share-panel__qr-svg" />
       </div>
 
       <p className="share-panel__url">
@@ -54,17 +53,13 @@ export function SharePanel({ cardId, card }: SharePanelProps) {
 
       <div className="share-panel__actions">
         <button type="button" className="btn btn--primary" onClick={() => void copyLink()}>
-          Copy link
+          {t.share.copyLink}
         </button>
         <button type="button" className="btn" onClick={() => void shareNative()}>
-          Share…
+          {t.share.share}
         </button>
-        <button
-          type="button"
-          className="btn"
-          onClick={() => downloadVCard(card, url)}
-        >
-          Download vCard
+        <button type="button" className="btn" onClick={() => downloadVCard(card, url)}>
+          {t.share.downloadVCard}
         </button>
       </div>
     </section>

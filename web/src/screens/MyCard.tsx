@@ -15,9 +15,11 @@ import {
   viewsCounterKey,
   type BusinessCard,
 } from '../lib/card';
+import { useI18n } from '../lib/i18n';
 
 export function MyCard() {
   const { user, loading: authLoading } = useAuth(fas);
+  const { t } = useI18n();
   const toast = useToast();
   const [draft, setDraft] = useState<BusinessCard>(EMPTY_CARD);
   const [saved, setSaved] = useState<BusinessCard>(EMPTY_CARD);
@@ -76,12 +78,8 @@ export function MyCard() {
         }
       } catch (err) {
         if (!ac.signal.aborted) {
-          const raw = err instanceof Error ? err.message : 'Could not load your card.';
-          setError(
-            /unknown app/i.test(raw)
-              ? 'This app is not on FreeAppStore yet. Run fas login && fas publish, then fas db share cards.'
-              : raw,
-          );
+          const raw = err instanceof Error ? err.message : t.myCard.loadError;
+          setError(/unknown app/i.test(raw) ? t.myCard.unknownAppError : raw);
         }
       } finally {
         if (!ac.signal.aborted) setLoading(false);
@@ -89,11 +87,11 @@ export function MyCard() {
     })();
 
     return () => ac.abort();
-  }, [user]);
+  }, [user, t.myCard.loadError, t.myCard.unknownAppError]);
 
   const save = async () => {
     const next = normalizeCard(draft);
-    const invalid = validateCard(next);
+    const invalid = validateCard(next, t.validation);
     if (invalid) {
       toast.show(invalid, { variant: 'error' });
       return;
@@ -117,12 +115,10 @@ export function MyCard() {
         setSaved(fields);
         setViews(0);
       }
-      toast.show('Card saved', { variant: 'success' });
+      toast.show(t.myCard.savedToast, { variant: 'success' });
     } catch (err) {
-      const raw = err instanceof Error ? err.message : 'Save failed.';
-      const message = /unknown app/i.test(raw)
-        ? 'This app is not on FreeAppStore yet. Run fas login && fas publish, then fas db share cards.'
-        : raw;
+      const raw = err instanceof Error ? err.message : t.myCard.saveError;
+      const message = /unknown app/i.test(raw) ? t.myCard.unknownAppError : raw;
       setError(message);
       toast.show(message, { variant: 'error' });
     } finally {
@@ -133,8 +129,8 @@ export function MyCard() {
   if (authLoading) {
     return (
       <>
-        <PageHeader title="My card" />
-        <p role="status">Loading account…</p>
+        <PageHeader title={t.myCard.title} />
+        <p role="status">{t.myCard.loadingAccount}</p>
         <Spinner />
       </>
     );
@@ -143,10 +139,7 @@ export function MyCard() {
   if (!user) {
     return (
       <>
-        <PageHeader
-          title="My card"
-          description="Sign in to create your public profile, QR code, and vCard."
-        />
+        <PageHeader title={t.myCard.title} description={t.myCard.signInDescription} />
         <SignInButton app={fas} />
       </>
     );
@@ -155,8 +148,8 @@ export function MyCard() {
   return (
     <>
       <PageHeader
-        title="My card"
-        description="Edit your details, then share the QR or link."
+        title={t.myCard.title}
+        description={t.myCard.description}
         actions={
           <button
             type="button"
@@ -164,14 +157,14 @@ export function MyCard() {
             disabled={!dirty || saving}
             onClick={() => void save()}
           >
-            {saving ? 'Saving…' : 'Save'}
+            {saving ? t.myCard.saving : t.myCard.save}
           </button>
         }
       />
 
       {loading ? (
         <>
-          <p role="status">Loading your card…</p>
+          <p role="status">{t.myCard.loadingCard}</p>
           <Spinner />
         </>
       ) : null}
@@ -182,7 +175,7 @@ export function MyCard() {
       ) : null}
       {dirty ? (
         <p className="form-hint" role="status">
-          Unsaved changes
+          {t.myCard.unsaved}
         </p>
       ) : null}
 
@@ -191,9 +184,7 @@ export function MyCard() {
         <div className="my-card-layout__side">
           <CardPreview card={draft} views={views} />
           {cardId && !dirty ? <SharePanel cardId={cardId} card={saved} /> : null}
-          {cardId && dirty ? (
-            <p className="form-hint">Save to refresh your share link and QR.</p>
-          ) : null}
+          {cardId && dirty ? <p className="form-hint">{t.myCard.saveToRefresh}</p> : null}
         </div>
       </div>
     </>

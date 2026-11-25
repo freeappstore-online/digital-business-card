@@ -1,5 +1,6 @@
 import { useRef, useState, type ChangeEvent } from 'react';
 import type { BusinessCard } from '../lib/card';
+import { useI18n } from '../lib/i18n';
 import { compressProfilePhoto } from '../lib/photo';
 
 type CardFormProps = {
@@ -12,35 +13,29 @@ type TextFieldKey = Exclude<keyof BusinessCard, 'photo'>;
 
 const FIELDS: {
   key: TextFieldKey;
-  label: string;
   type?: string;
   autoComplete?: string;
-  placeholder?: string;
   multiline?: boolean;
 }[] = [
-  { key: 'displayName', label: 'Name', autoComplete: 'name', placeholder: 'Alex Rivera' },
-  { key: 'headline', label: 'Headline', placeholder: 'Product designer' },
-  { key: 'company', label: 'Company', autoComplete: 'organization', placeholder: 'Studio North' },
-  { key: 'email', label: 'Email', type: 'email', autoComplete: 'email', placeholder: 'alex@example.com' },
-  { key: 'phone', label: 'Phone', type: 'tel', autoComplete: 'tel', placeholder: '+1 555 0100' },
-  { key: 'website', label: 'Website', type: 'url', placeholder: 'https://example.com' },
-  { key: 'location', label: 'Location', autoComplete: 'address-level2', placeholder: 'Melbourne' },
-  { key: 'linkedin', label: 'LinkedIn URL', type: 'url', placeholder: 'https://linkedin.com/in/…' },
-  { key: 'x', label: 'X URL', type: 'url', placeholder: 'https://x.com/…' },
-  { key: 'github', label: 'GitHub URL', type: 'url', placeholder: 'https://github.com/…' },
-  { key: 'instagram', label: 'Instagram', placeholder: '@handle or https://instagram.com/…' },
-  { key: 'whatsapp', label: 'WhatsApp', placeholder: '+61 411 935 878 or https://wa.me/…' },
-  { key: 'wechat', label: 'WeChat ID', placeholder: 'your_wechat_id' },
-  { key: 'telegram', label: 'Telegram', placeholder: '@username or https://t.me/…' },
-  {
-    key: 'bio',
-    label: 'Bio',
-    multiline: true,
-    placeholder: 'One short line about what you do.',
-  },
+  { key: 'displayName', autoComplete: 'name' },
+  { key: 'headline' },
+  { key: 'company', autoComplete: 'organization' },
+  { key: 'email', type: 'email', autoComplete: 'email' },
+  { key: 'phone', type: 'tel', autoComplete: 'tel' },
+  { key: 'website', type: 'url' },
+  { key: 'location', autoComplete: 'address-level2' },
+  { key: 'linkedin', type: 'url' },
+  { key: 'x', type: 'url' },
+  { key: 'github', type: 'url' },
+  { key: 'instagram' },
+  { key: 'whatsapp' },
+  { key: 'wechat' },
+  { key: 'telegram' },
+  { key: 'bio', multiline: true },
 ];
 
 export function CardForm({ value, onChange, disabled }: CardFormProps) {
+  const { t } = useI18n();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [photoBusy, setPhotoBusy] = useState(false);
   const [photoError, setPhotoError] = useState<string | null>(null);
@@ -54,7 +49,7 @@ export function CardForm({ value, onChange, disabled }: CardFormProps) {
       const dataUrl = await compressProfilePhoto(file);
       onChange({ ...value, photo: dataUrl });
     } catch (err) {
-      setPhotoError(err instanceof Error ? err.message : 'Could not load that photo.');
+      setPhotoError(err instanceof Error ? err.message : t.form.photoError);
     } finally {
       setPhotoBusy(false);
       if (fileInputRef.current) fileInputRef.current.value = '';
@@ -64,12 +59,12 @@ export function CardForm({ value, onChange, disabled }: CardFormProps) {
   return (
     <div className="card-form">
       <div className="card-form__field">
-        <label htmlFor="card-photo">Profile photo</label>
+        <label htmlFor="card-photo">{t.form.photoLabel}</label>
         <div className="photo-picker">
           {value.photo ? (
             <img
               src={value.photo}
-              alt={`${value.displayName || 'Profile'} preview`}
+              alt={t.form.photoPreviewAlt(value.displayName)}
               className="photo-picker__thumb"
             />
           ) : (
@@ -97,12 +92,12 @@ export function CardForm({ value, onChange, disabled }: CardFormProps) {
                   onChange({ ...value, photo: '' });
                 }}
               >
-                Remove photo
+                {t.form.removePhoto}
               </button>
             ) : null}
           </div>
         </div>
-        <p className="form-hint">Cropped to a square and compressed automatically.</p>
+        <p className="form-hint">{t.form.photoHint}</p>
         {photoError ? (
           <p role="alert" className="form-alert">
             {photoError}
@@ -112,6 +107,7 @@ export function CardForm({ value, onChange, disabled }: CardFormProps) {
 
       {FIELDS.map((field) => {
         const id = `card-${field.key}`;
+        const copy = t.form.fields[field.key];
         const common = {
           id,
           name: field.key,
@@ -119,13 +115,13 @@ export function CardForm({ value, onChange, disabled }: CardFormProps) {
           value: value[field.key],
           onChange: (event: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) =>
             onChange({ ...value, [field.key]: event.currentTarget.value }),
-          placeholder: field.placeholder,
+          placeholder: copy.placeholder,
           autoComplete: field.autoComplete,
         };
 
         return (
           <div key={field.key} className="card-form__field">
-            <label htmlFor={id}>{field.label}</label>
+            <label htmlFor={id}>{copy.label}</label>
             {field.multiline ? (
               <textarea {...common} rows={3} />
             ) : (

@@ -1,4 +1,5 @@
 import type { FreeAppStore } from '@freeappstore/sdk';
+import { MESSAGES, type Locale } from './i18n';
 import { MAX_PHOTO_DATA_URL_LENGTH } from './photo';
 
 export const CARDS_COLLECTION = 'cards';
@@ -108,10 +109,33 @@ export function resolveWhatsAppUrl(value: string): string | null {
   return digits.length >= 6 && digits.length <= 15 ? `https://wa.me/${digits}` : null;
 }
 
-export function validateCard(card: BusinessCard): string | null {
-  if (!card.displayName) return 'Add your name.';
+export type ValidationMessages = {
+  nameRequired: string;
+  invalidEmail: string;
+  invalidUrl: (label: string) => string;
+  invalidInstagram: string;
+  invalidWhatsApp: string;
+  invalidTelegram: string;
+  invalidPhoto: string;
+};
+
+const DEFAULT_VALIDATION: ValidationMessages = {
+  nameRequired: 'Add your name.',
+  invalidEmail: 'Enter a valid email, or leave it blank.',
+  invalidUrl: (label: string) => `${label} must start with https://`,
+  invalidInstagram: 'Instagram must be a @handle or https:// URL.',
+  invalidWhatsApp: 'WhatsApp must be a phone number (with country code) or https://wa.me/… URL.',
+  invalidTelegram: 'Telegram must be a @username or https://t.me/… URL.',
+  invalidPhoto: 'Profile photo is invalid or too large.',
+};
+
+export function validateCard(
+  card: BusinessCard,
+  messages: ValidationMessages = DEFAULT_VALIDATION,
+): string | null {
+  if (!card.displayName) return messages.nameRequired;
   if (card.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(card.email)) {
-    return 'Enter a valid email, or leave it blank.';
+    return messages.invalidEmail;
   }
   for (const [label, value] of [
     ['Website', card.website],
@@ -120,20 +144,20 @@ export function validateCard(card: BusinessCard): string | null {
     ['GitHub', card.github],
   ] as const) {
     if (value && !isHttpUrl(value)) {
-      return `${label} must start with https://`;
+      return messages.invalidUrl(label);
     }
   }
   if (card.instagram && !resolveInstagramUrl(card.instagram)) {
-    return 'Instagram must be a @handle or https:// URL.';
+    return messages.invalidInstagram;
   }
   if (card.whatsapp && !resolveWhatsAppUrl(card.whatsapp)) {
-    return 'WhatsApp must be a phone number (with country code) or https://wa.me/… URL.';
+    return messages.invalidWhatsApp;
   }
   if (card.telegram && !resolveTelegramUrl(card.telegram)) {
-    return 'Telegram must be a @username or https://t.me/… URL.';
+    return messages.invalidTelegram;
   }
   if (card.photo && !isValidPhotoDataUrl(card.photo)) {
-    return 'Profile photo is invalid or too large.';
+    return messages.invalidPhoto;
   }
   return null;
 }
