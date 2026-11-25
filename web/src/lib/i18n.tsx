@@ -69,7 +69,10 @@ export const MESSAGES = {
     form: {
       photoLabel: 'Profile photo',
       photoPreviewAlt: (name: string) => `${name || 'Profile'} preview`,
-      removePhoto: 'Remove photo',
+      uploadPhoto: 'Upload photo',
+      changePhoto: 'Change photo',
+      removePhoto: 'Remove',
+      socialLinksSection: (count: number) => (count > 0 ? `Social links (${count})` : 'Social links'),
       photoHint: 'Auto-cropped to a square and compressed.',
       photoError: 'Could not load that photo.',
       fields: {
@@ -123,6 +126,9 @@ export const MESSAGES = {
       fallbackDesc: 'Digital business card',
       saveContact: 'Save contact',
       vCardDownloaded: 'Contact file (.vcf) downloaded',
+      wechatCopied: 'WeChat ID copied',
+      flipToQr: 'Show QR',
+      flipToFront: 'Back to card',
     },
     about: {
       title: 'About',
@@ -179,7 +185,10 @@ export const MESSAGES = {
     form: {
       photoLabel: '头像照片',
       photoPreviewAlt: (name: string) => `${name || '个人'}头像预览`,
-      removePhoto: '移除照片',
+      uploadPhoto: '上传照片',
+      changePhoto: '更换照片',
+      removePhoto: '移除',
+      socialLinksSection: (count: number) => (count > 0 ? `社交账号 (${count})` : '社交账号'),
       photoHint: '会自动裁切为正方形并压缩，适配通讯录导入。',
       photoError: '无法读取该图片，请换一张重试。',
       fields: {
@@ -233,6 +242,9 @@ export const MESSAGES = {
       fallbackDesc: '电子名片',
       saveContact: '存入通讯录',
       vCardDownloaded: '已下载通讯录文件 (.vcf)',
+      wechatCopied: '微信号已复制',
+      flipToQr: '翻转看二维码',
+      flipToFront: '返回正面',
     },
     about: {
       title: '关于',
@@ -289,7 +301,10 @@ export const MESSAGES = {
     form: {
       photoLabel: 'プロフィール写真',
       photoPreviewAlt: (name: string) => `${name || 'プロフィール'}のプレビュー`,
-      removePhoto: '写真を削除',
+      uploadPhoto: '写真を選択',
+      changePhoto: '写真を変更',
+      removePhoto: '削除',
+      socialLinksSection: (count: number) => (count > 0 ? `SNSリンク (${count})` : 'SNSリンク'),
       photoHint: '自動で正方形にトリミング・圧縮されます。',
       photoError: '画像を読み込めませんでした。',
       fields: {
@@ -343,6 +358,9 @@ export const MESSAGES = {
       fallbackDesc: 'デジタル名刺',
       saveContact: '連絡先に保存',
       vCardDownloaded: '連絡先ファイル(.vcf)をダウンロードしました',
+      wechatCopied: 'WeChat IDをコピーしました',
+      flipToQr: 'QRを表示',
+      flipToFront: '表面に戻る',
     },
     about: {
       title: '概要',
@@ -399,7 +417,10 @@ export const MESSAGES = {
     form: {
       photoLabel: '프로필 사진',
       photoPreviewAlt: (name: string) => `${name || '프로필'} 미리보기`,
-      removePhoto: '사진 삭제',
+      uploadPhoto: '사진 업로드',
+      changePhoto: '사진 변경',
+      removePhoto: '삭제',
+      socialLinksSection: (count: number) => (count > 0 ? `소셜 링크 (${count})` : '소셜 링크'),
       photoHint: '자동으로 정사각형으로 자르고 압축합니다.',
       photoError: '사진을 불러올 수 없습니다.',
       fields: {
@@ -453,6 +474,9 @@ export const MESSAGES = {
       fallbackDesc: '디지털 명함',
       saveContact: '연락처 저장',
       vCardDownloaded: '연락처 파일(.vcf)이 다운로드되었습니다',
+      wechatCopied: 'WeChat ID가 복사되었습니다',
+      flipToQr: 'QR 보기',
+      flipToFront: '앞면으로',
     },
     about: {
       title: '소개',
@@ -509,7 +533,10 @@ export const MESSAGES = {
     form: {
       photoLabel: 'Foto de perfil',
       photoPreviewAlt: (name: string) => `Vista previa de ${name || 'perfil'}`,
-      removePhoto: 'Quitar foto',
+      uploadPhoto: 'Subir foto',
+      changePhoto: 'Cambiar foto',
+      removePhoto: 'Quitar',
+      socialLinksSection: (count: number) => (count > 0 ? `Redes sociales (${count})` : 'Redes sociales'),
       photoHint: 'Se recorta en cuadrado y se comprime automáticamente.',
       photoError: 'No se pudo cargar esa foto.',
       fields: {
@@ -563,6 +590,9 @@ export const MESSAGES = {
       fallbackDesc: 'Tarjeta de presentación digital',
       saveContact: 'Guardar contacto',
       vCardDownloaded: 'Archivo de contacto (.vcf) descargado',
+      wechatCopied: 'WeChat ID copiado',
+      flipToQr: 'Ver QR',
+      flipToFront: 'Volver al frente',
     },
     about: {
       title: 'Acerca de',
@@ -619,7 +649,10 @@ export const MESSAGES = {
     form: {
       photoLabel: 'Photo de profil',
       photoPreviewAlt: (name: string) => `Aperçu de ${name || 'profil'}`,
-      removePhoto: 'Supprimer la photo',
+      uploadPhoto: 'Importer',
+      changePhoto: 'Changer',
+      removePhoto: 'Supprimer',
+      socialLinksSection: (count: number) => (count > 0 ? `Réseaux sociaux (${count})` : 'Réseaux sociaux'),
       photoHint: 'Recadrée en carré et compressée automatiquement.',
       photoError: 'Impossible de lire cette photo.',
       fields: {
@@ -673,6 +706,9 @@ export const MESSAGES = {
       fallbackDesc: 'Carte de visite digitale',
       saveContact: 'Enregistrer le contact',
       vCardDownloaded: 'Fichier contact (.vcf) téléchargé',
+      wechatCopied: 'WeChat ID copié',
+      flipToQr: 'Voir le QR',
+      flipToFront: 'Retour',
     },
     about: {
       title: 'À propos',

@@ -41,15 +41,10 @@ export function SharePanel({ cardId, card }: SharePanelProps) {
   return (
     <section className="share-panel" aria-labelledby="share-title">
       <h2 id="share-title">{t.share.title}</h2>
-      <p className="share-panel__hint">{t.share.hint}</p>
 
       <div className="share-panel__qr">
         <QrCode value={url} label={t.share.qrAlt(card.displayName)} className="share-panel__qr-svg" />
       </div>
-
-      <p className="share-panel__url">
-        <a href={url}>{url}</a>
-      </p>
 
       <div className="share-panel__actions">
         <button type="button" className="btn btn--primary" onClick={() => void copyLink()}>
